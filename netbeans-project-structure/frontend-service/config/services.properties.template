@@ -1,0 +1,6 @@
+# Environment-driven API endpoints
+auth.baseUrl=${AUTH_BASE_URL}
+catalog.baseUrl=${CATALOG_BASE_URL}
+inventory.baseUrl=${INVENTORY_BASE_URL}
+reservation.baseUrl=${RESERVATION_BASE_URL}
+checkout.baseUrl=${CHECKOUT_BASE_URL}

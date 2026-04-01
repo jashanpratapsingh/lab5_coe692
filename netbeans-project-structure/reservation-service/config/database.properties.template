@@ -1,0 +1,9 @@
+# Environment-driven DB template for reservation-service
+# Prefer setting RESERVATION_DB_* env vars in Docker/Kubernetes.
+# Fallback shared env vars are DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASSWORD.
+
+db.host=${RESERVATION_DB_HOST}
+db.port=${RESERVATION_DB_PORT}
+db.name=${RESERVATION_DB_NAME}
+db.user=${RESERVATION_DB_USER}
+db.password=${RESERVATION_DB_PASSWORD}

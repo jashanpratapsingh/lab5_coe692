@@ -1,0 +1,9 @@
+# Environment-driven DB template for checkout-penalty-service
+# Prefer setting CHECKOUT_DB_* env vars in Docker/Kubernetes.
+# Fallback shared env vars are DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASSWORD.
+
+db.host=${CHECKOUT_DB_HOST}
+db.port=${CHECKOUT_DB_PORT}
+db.name=${CHECKOUT_DB_NAME}
+db.user=${CHECKOUT_DB_USER}
+db.password=${CHECKOUT_DB_PASSWORD}

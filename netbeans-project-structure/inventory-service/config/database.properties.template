@@ -1,0 +1,9 @@
+# Environment-driven DB template for inventory-service
+# Prefer setting INVENTORY_DB_* env vars in Docker/Kubernetes.
+# Fallback shared env vars are DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASSWORD.
+
+db.host=${INVENTORY_DB_HOST}
+db.port=${INVENTORY_DB_PORT}
+db.name=${INVENTORY_DB_NAME}
+db.user=${INVENTORY_DB_USER}
+db.password=${INVENTORY_DB_PASSWORD}
