@@ -16,6 +16,9 @@ function appBasePath() {
 // Cookie name shared with backend JwtUtil.TOKEN_COOKIE_NAME (sent automatically on same-origin fetch).
 const TOKEN_COOKIE = "lab5_token";
 const TOKEN_COOKIE_MAX_AGE_SEC = 3600;
+const SESSION_MARKER_KEY = "lab5_session_marker";
+const SESSION_MARKER_HEADER = "X-LAB5-SESSION-MARKER";
+const PRIVATE_BLOCK_KEY = "lab5_private_browser_blocked";
 
 function setTokenCookie(token) {
   if (!token) {
@@ -57,6 +60,15 @@ function getToken() {
   return sessionStorage.getItem("lab5_token") || getTokenCookie() || "";
 }
 
+function setSessionMarker(marker) {
+  if (marker) sessionStorage.setItem(SESSION_MARKER_KEY, marker);
+  else sessionStorage.removeItem(SESSION_MARKER_KEY);
+}
+
+function getSessionMarker() {
+  return sessionStorage.getItem(SESSION_MARKER_KEY) || "";
+}
+
 function setUser(user) {
   if (user) sessionStorage.setItem("lab5_user", user);
   else sessionStorage.removeItem("lab5_user");
@@ -66,8 +78,31 @@ function getUser() {
   return sessionStorage.getItem("lab5_user") || "";
 }
 
+function clearAuthState() {
+  setToken("");
+  setUser("");
+  setSessionMarker("");
+}
+
+function isPrivateBlocked() {
+  try {
+    return window.sessionStorage.getItem(PRIVATE_BLOCK_KEY) === "1";
+  } catch (_) {
+    return false;
+  }
+}
+
+function setPrivateBlocked(flag) {
+  try {
+    if (flag) window.sessionStorage.setItem(PRIVATE_BLOCK_KEY, "1");
+    else window.sessionStorage.removeItem(PRIVATE_BLOCK_KEY);
+  } catch (_) {
+  }
+}
+
 function ensureAuthOrRedirect() {
   blockPrivateModeIfNeeded();
+  if (isPrivateBlocked()) return;
   if (!getToken()) {
     window.location.href = `${appBasePath()}/login.jsp`;
     return;
@@ -76,17 +111,21 @@ function ensureAuthOrRedirect() {
 }
 
 function logout() {
-  setToken("");
-  setUser("");
+  clearAuthState();
   window.location.href = `${appBasePath()}/login.jsp`;
 }
 
 async function requestJson(url, options = {}) {
   try {
+    if (isPrivateBlocked()) {
+      return { ok: false, status: 403, data: { error: "Private browsing is blocked for this application." } };
+    }
     const token = getToken();
+    const marker = getSessionMarker();
     const headers = Object.assign({}, options.headers || {});
     // Skip auth header injection for the login endpoint itself.
     if (token && !url.includes("/auth/login")) headers["Authorization"] = `Bearer ${token}`;
+    if (marker && !url.includes("/auth/login")) headers[SESSION_MARKER_HEADER] = marker;
 
     const fetchOptions = Object.assign({}, options, {
       headers,
@@ -239,13 +278,14 @@ function updateHeaderToken() {
 }
 
 function redirectBlockedByPrivate(isLoginPage) {
-  try { setToken(""); } catch (_) {}
-  try { setUser(""); } catch (_) {}
+  setPrivateBlocked(true);
+  clearAuthState();
 
   const badge = document.getElementById("tokenBadge");
   if (badge) badge.textContent = "Private browsing not allowed";
 
-  if (!isLoginPage || window.location.search.indexOf("private=1") === -1) {
+  const params = new URLSearchParams(window.location.search);
+  if (!isLoginPage || params.get("private") !== "1") {
     window.location.href = `${appBasePath()}/login.jsp?private=1`;
   }
 }
@@ -253,11 +293,15 @@ function redirectBlockedByPrivate(isLoginPage) {
 function blockPrivateModeIfNeeded() {
   // Best-effort heuristic only. Detecting private/incognito reliably is not supported by browsers.
   const params = new URLSearchParams(window.location.search);
-  if (params.get("private") === "1") return;
 
   const probeKey = "lab5_private_window_probe";
   const probeMode = params.get("privateProbe");
   const isLoginPage = window.location.pathname.endsWith("/login.jsp") || window.location.pathname.endsWith("login.jsp");
+
+  if (isPrivateBlocked()) {
+    redirectBlockedByPrivate(isLoginPage);
+    return;
+  }
 
   const probeDoneKey = "lab5_private_probe_done";
   let alreadyProbed = false;
@@ -299,7 +343,7 @@ blockPrivateModeIfNeeded();
 (() => {
   try {
     const params = new URLSearchParams(window.location.search);
-    if (params.get("private") !== "1") return;
+    if (params.get("private") !== "1" && !isPrivateBlocked()) return;
     renderText("loginOut", "Private browsing not allowed", ["Please open this site in a normal (non-private) window and try again."]);
   } catch (_) {}
 })();
@@ -319,9 +363,8 @@ async function verifyTokenAccessOrClear() {
     if (badge) badge.textContent = "Verifying token...";
 
     const res = await requestJson(`${API.catalog}/catalog/equipment?query=__token_probe__`);
-    if (!res.ok && res.status === 401) {
-      setToken("");
-      setUser("");
+    if (!res.ok && (res.status === 401 || res.status === 403)) {
+      clearAuthState();
       if (badge) badge.textContent = "Token invalid";
       window.location.href = `${appBasePath()}/login.jsp`;
       return;

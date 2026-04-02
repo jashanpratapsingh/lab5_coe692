@@ -12,6 +12,8 @@ import java.security.Key;
 public class JwtUtil {
     /** Must match frontend TOKEN_COOKIE in assets/app.js */
     public static final String TOKEN_COOKIE_NAME = "lab5_token";
+    public static final String SESSION_MARKER_HEADER = "X-LAB5-SESSION-MARKER";
+    private static final String SESSION_MARKER_CLAIM = "sessionMarker";
 
     private static final String JWT_SECRET_ENV = "JWT_SECRET";
     // Minimum 32 bytes when UTF-8 encoded (for HS256).
@@ -55,6 +57,18 @@ public class JwtUtil {
         return claims.getSubject();
     }
 
+    public static boolean validateSessionMarker(String token, String markerHeader) {
+        if (!validateToken(token) || !isValidSessionMarker(markerHeader)) return false;
+        Claims claims = Jwts.parser()
+                .setSigningKey(signingKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        Object claimValue = claims.get(SESSION_MARKER_CLAIM);
+        if (claimValue == null) return false;
+        return markerHeader.equals(String.valueOf(claimValue));
+    }
+
     public static String readTokenFromCookieHeader(String cookieHeader) {
         if (cookieHeader == null || cookieHeader.isEmpty()) return null;
         String prefix = TOKEN_COOKIE_NAME + "=";
@@ -70,6 +84,12 @@ public class JwtUtil {
             }
         }
         return null;
+    }
+
+    private static boolean isValidSessionMarker(String marker) {
+        if (marker == null) return false;
+        String value = marker.trim();
+        return value.matches("^[A-Za-z0-9]{16,64}$");
     }
 }
 

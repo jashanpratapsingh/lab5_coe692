@@ -46,6 +46,12 @@
     updateHeaderToken();
 
     async function doLogin() {
+      if (isPrivateBlocked()) {
+        renderText('loginOut', 'Private browsing not allowed', ['Please open this site in a normal (non-private) window and try again.']);
+        clearAuthState();
+        updateHeaderToken();
+        return;
+      }
       const body = {
         username: document.getElementById('username').value,
         password: document.getElementById('password').value
@@ -57,13 +63,14 @@
       });
       renderAuthResult('loginOut', result);
       if (result.ok && result.data && result.data.success && result.data.token) {
+        setPrivateBlocked(false);
         setToken(result.data.token);
+        setSessionMarker(result.data.sessionMarker || '');
         setUser(body.username);
         updateHeaderToken();
         setTimeout(() => { window.location.href = `${appBasePath()}/dashboard.jsp`; }, 400);
       } else {
-        setToken('');
-        setUser('');
+        clearAuthState();
         updateHeaderToken();
       }
     }

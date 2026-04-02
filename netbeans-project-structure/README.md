@@ -129,6 +129,17 @@ KubeMQ env vars used by async messaging:
 - `KUBEMQ_ADDRESS` (fallback supports `kubeMQAddress`)
 - `RESERVATION_EVENT_CHANNEL` (default `reservation-events`)
 
+## Security Policy (JWT + Session Marker)
+
+- Private/incognito browser sessions are blocked in frontend guard logic.
+- All backend API endpoints now require:
+  - a valid JWT (`Authorization: Bearer <token>` or `lab5_token` cookie), and
+  - a valid session marker header: `X-LAB5-SESSION-MARKER`.
+- `/api/health` endpoints are protected and return `401` without authentication.
+- If JWT is present but marker is missing/invalid, services return `403`.
+- Only `auth-service` login endpoint remains public:
+  - `POST /auth-service/api/auth/login`
+
 ## Docker (12 Images)
 
 From Lab 5 root:
@@ -177,6 +188,7 @@ Frontend is exposed via `LoadBalancer` service `frontend-service-app`.
 Unit tests:
 
 ```bash
+mvn -f auth-service/pom.xml test
 mvn -f reservation-service/pom.xml test
 mvn -f inventory-service/pom.xml test
 ```
@@ -186,6 +198,7 @@ Smoke tests:
 ```bash
 cd "/home/jashanpratap/Projects/coe692/lab5_coe692"
 ./tests/local-smoke.sh
+./tests/security-smoke.sh
 ./tests/container-smoke.sh
 ./tests/k8s-smoke.sh
 ```
@@ -200,3 +213,8 @@ http://localhost:8080/reservation-service/api/health
 http://localhost:8080/checkout-penalty-service/api/health
 http://localhost:8080/frontend-service/
 ```
+
+Expected behavior:
+- Unauthenticated backend health calls -> `401`.
+- Authenticated health calls with JWT + `X-LAB5-SESSION-MARKER` -> `200`.
+- Frontend root redirects to login (`302`) when not authenticated.

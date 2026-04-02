@@ -9,10 +9,11 @@ public class AuthManager {
 
     public LoginResponse login(String username, String password) {
         if (store.validate(username, password)) {
-            String token = JwtUtil.createToken(username);
-            return new LoginResponse(true, token, "Login successful");
+            String sessionMarker = JwtUtil.createSessionMarker();
+            String token = JwtUtil.createToken(username, sessionMarker);
+            return new LoginResponse(true, token, sessionMarker, "Login successful");
         }
-        return new LoginResponse(false, "", "Invalid credentials");
+        return new LoginResponse(false, "", "", "Invalid credentials");
     }
 
     public boolean validateToken(String token) {

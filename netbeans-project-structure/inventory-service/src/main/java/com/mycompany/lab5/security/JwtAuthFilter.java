@@ -21,14 +21,6 @@ public class JwtAuthFilter implements ContainerRequestFilter {
         // Jersey app path is configured as "api", but getPath(false) may include it.
         if (path.startsWith("api/")) path = path.substring("api/".length());
 
-        if (path.equals("health") || path.endsWith("/health")) {
-            return;
-        }
-
-        if (path.startsWith("auth/login") || path.startsWith("auth/validate")) {
-            return;
-        }
-
         String token = null;
         String authHeader = requestContext.getHeaderString("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -45,6 +37,11 @@ public class JwtAuthFilter implements ContainerRequestFilter {
             abort(requestContext);
             return;
         }
+        String marker = requestContext.getHeaderString(JwtUtil.SESSION_MARKER_HEADER);
+        if (!JwtUtil.validateSessionMarker(token, marker)) {
+            abortForbidden(requestContext);
+            return;
+        }
 
         requestContext.setProperty("authUsername", JwtUtil.getUsername(token));
     }
@@ -53,6 +50,14 @@ public class JwtAuthFilter implements ContainerRequestFilter {
         requestContext.abortWith(
                 Response.status(Response.Status.UNAUTHORIZED)
                         .entity("{\"message\":\"Unauthorized\"}")
+                        .build()
+        );
+    }
+
+    private void abortForbidden(ContainerRequestContext requestContext) {
+        requestContext.abortWith(
+                Response.status(Response.Status.FORBIDDEN)
+                        .entity("{\"message\":\"Session marker missing or invalid\"}")
                         .build()
         );
     }

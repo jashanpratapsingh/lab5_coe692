@@ -9,10 +9,13 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
+import java.util.UUID;
 
 public class JwtUtil {
     /** Must match frontend TOKEN_COOKIE in assets/app.js */
     public static final String TOKEN_COOKIE_NAME = "lab5_token";
+    public static final String SESSION_MARKER_HEADER = "X-LAB5-SESSION-MARKER";
+    private static final String SESSION_MARKER_CLAIM = "sessionMarker";
 
     private static final String JWT_SECRET_ENV = "JWT_SECRET";
     // Minimum 32 bytes when UTF-8 encoded (for HS256).
@@ -34,9 +37,12 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public static String createToken(String username) {
+    public static String createToken(String username, String sessionMarker) {
         if (username == null || username.trim().isEmpty()) {
             throw new IllegalArgumentException("username must be provided");
+        }
+        if (!isValidSessionMarker(sessionMarker)) {
+            throw new IllegalArgumentException("sessionMarker must be provided");
         }
 
         long now = System.currentTimeMillis();
@@ -45,10 +51,15 @@ public class JwtUtil {
 
         return Jwts.builder()
                 .setSubject(username)
+                .claim(SESSION_MARKER_CLAIM, sessionMarker)
                 .setIssuedAt(issuedAt)
                 .setExpiration(expiration)
                 .signWith(signingKey(), io.jsonwebtoken.SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public static String createSessionMarker() {
+        return UUID.randomUUID().toString().replace("-", "");
     }
 
     public static boolean validateToken(String token) {
@@ -72,6 +83,24 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody();
         return claims.getSubject();
+    }
+
+    public static boolean validateSessionMarker(String token, String markerHeader) {
+        if (!validateToken(token) || !isValidSessionMarker(markerHeader)) return false;
+        Claims claims = Jwts.parser()
+                .setSigningKey(signingKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        Object claimValue = claims.get(SESSION_MARKER_CLAIM);
+        if (claimValue == null) return false;
+        return markerHeader.equals(String.valueOf(claimValue));
+    }
+
+    private static boolean isValidSessionMarker(String marker) {
+        if (marker == null) return false;
+        String value = marker.trim();
+        return value.matches("^[A-Za-z0-9]{16,64}$");
     }
 
     /**
