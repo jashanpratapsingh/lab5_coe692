@@ -68,7 +68,7 @@
         setSessionMarker(result.data.sessionMarker || '');
         setUser(body.username);
         updateHeaderToken();
-        setTimeout(() => { window.location.href = `${appBasePath()}/dashboard.jsp`; }, 400);
+        setTimeout(() => { window.location.href = '/dashboard.jsp'; }, 400);
       } else {
         clearAuthState();
         updateHeaderToken();

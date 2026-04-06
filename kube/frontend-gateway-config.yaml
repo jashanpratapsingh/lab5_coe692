@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-gateway-nginx
+data:
+  default.conf: |
+    server {
+      listen 8081;
+      server_name _;
+
+      location /auth-service/ {
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Port 80;
+        proxy_pass http://auth-service-app:8080/auth-service/;
+      }
+
+      location /catalog-service/ {
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Port 80;
+        proxy_pass http://catalog-service-app:8080/catalog-service/;
+      }
+
+      location /inventory-service/ {
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Port 80;
+        proxy_pass http://inventory-service-app:8080/inventory-service/;
+      }
+
+      location /reservation-service/ {
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Port 80;
+        proxy_pass http://reservation-service-app:8080/reservation-service/;
+      }
+
+      location /checkout-penalty-service/ {
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Port 80;
+        proxy_pass http://checkout-penalty-service-app:8080/checkout-penalty-service/;
+      }
+
+      location / {
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Port 80;
+        proxy_redirect http://$host:8081/ /;
+        proxy_pass http://127.0.0.1:8080/;
+      }
+    }

@@ -16,6 +16,7 @@ metadata:
 spec:
   selector:
     app: auth-service-app
+  type: NodePort
   ports:
     - port: 8080
       targetPort: 8080
@@ -38,6 +39,7 @@ metadata:
 spec:
   selector:
     app: catalog-service-app
+  type: NodePort
   ports:
     - port: 8080
       targetPort: 8080
@@ -60,6 +62,7 @@ metadata:
 spec:
   selector:
     app: inventory-service-app
+  type: NodePort
   ports:
     - port: 8080
       targetPort: 8080
@@ -82,6 +85,7 @@ metadata:
 spec:
   selector:
     app: reservation-service-app
+  type: NodePort
   ports:
     - port: 8080
       targetPort: 8080
@@ -104,6 +108,7 @@ metadata:
 spec:
   selector:
     app: checkout-penalty-service-app
+  type: NodePort
   ports:
     - port: 8080
       targetPort: 8080
@@ -123,10 +128,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: frontend-service-app
+  annotations:
+    beta.cloud.google.com/backend-config: '{"default":"frontend-backendconfig"}'
 spec:
   selector:
     app: frontend-service-app
   type: LoadBalancer
   ports:
     - port: 80
-      targetPort: 8080
+      targetPort: 8081

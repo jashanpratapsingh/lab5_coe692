@@ -10,7 +10,11 @@ const API = {
 
 function appBasePath() {
   const segs = window.location.pathname.split("/").filter(Boolean);
-  return segs.length > 0 ? `/${segs[0]}` : "";
+  if (segs.length === 0) return "";
+  const first = segs[0];
+  // When deployed at root, paths like /login.jsp or /dashboard.jsp are files, not context roots.
+  if (first.endsWith(".jsp")) return "";
+  return `/${first}`;
 }
 
 // Cookie name shared with backend JwtUtil.TOKEN_COOKIE_NAME (sent automatically on same-origin fetch).

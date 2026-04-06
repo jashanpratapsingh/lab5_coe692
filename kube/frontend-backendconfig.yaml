@@ -1,0 +1,9 @@
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: frontend-backendconfig
+spec:
+  healthCheck:
+    requestPath: /login.jsp
+    port: 8080
+    type: HTTP
