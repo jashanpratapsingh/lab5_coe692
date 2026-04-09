@@ -125,15 +125,15 @@ button {
   margin-top: 10px;
   cursor: pointer;
   border: none;
-  color: #ffcc33;
+  color: #0a1f1c;
   font-weight: bold;
-  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  background: linear-gradient(90deg, #14b8a6, #22c55e);
   transition: transform .15s ease, box-shadow .15s ease;
 }
 
 button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(110, 231, 255, 0.25);
+  box-shadow: 0 8px 20px rgba(20, 184, 166, 0.35);
 }
 
 button.secondary {
