@@ -35,7 +35,7 @@
       <a href="reservation.jsp">Reservation</a>
       <a href="checkout.jsp">Checkout/Return</a>
       <a href="history.jsp">History</a>
-      <a href="javascript:void(0)" onclick="logout()">Logout</a>
+      <a href="javascript:void(0)" onclick="logout()">Logout</a> 
     </div>
 
     <div class="grid">
@@ -46,7 +46,7 @@
       </section>
       <section class="card">
         <h3>Service Health Check</h3>
-        <button onclick="checkHealth()">Run Health Checks</button>
+        <button color="red" onclick="checkHealth()">Run Health Checks</button>
         <pre id="healthOut"></pre>
       </section>
       <section class="card">
