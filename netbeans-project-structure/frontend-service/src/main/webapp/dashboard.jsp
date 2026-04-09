@@ -25,9 +25,6 @@
         <rect x="5" y="5" width="230" height="90" rx="22" fill="none" stroke="url(#g1)" stroke-width="6" />
         <path d="M30 62 C60 20, 100 88, 135 48 C162 20, 195 76, 212 42" fill="none" stroke="url(#g1)" stroke-width="7" stroke-linecap="round"/>
       </svg>
-      <div>
-        <span class="badge err" id="tokenBadge">Token not set</span>
-      </div>
     </div>
     <div class="menu">
       <a href="dashboard.jsp">Dashboard</a>
