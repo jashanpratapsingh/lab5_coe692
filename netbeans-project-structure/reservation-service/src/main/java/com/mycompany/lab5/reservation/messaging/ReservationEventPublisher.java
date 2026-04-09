@@ -10,6 +10,7 @@ public class ReservationEventPublisher {
     private static final String DEFAULT_CHANNEL = "reservation-events";
     private static final String CLIENT_ID = "reservation-service-publisher";
 
+    
     public void publish(Reservation reservation, String action) {
         if (reservation == null || action == null || action.trim().isEmpty()) {
             return;
