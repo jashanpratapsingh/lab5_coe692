@@ -125,7 +125,7 @@ button {
   margin-top: 10px;
   cursor: pointer;
   border: none;
-  color: #0b1020;
+  color: #ffcc33;
   font-weight: bold;
   background: linear-gradient(135deg, var(--accent2), var(--accent));
   transition: transform .15s ease, box-shadow .15s ease;
