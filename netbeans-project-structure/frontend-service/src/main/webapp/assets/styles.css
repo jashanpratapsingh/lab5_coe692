@@ -1,8 +1,8 @@
 :root {
   --bg: #0b1020;
   --card: #141a31;
-  --accent: #6ee7ff;
-  --accent2: #8b5cf6;
+  --accent: #ffffff;
+  --accent2: #ffffff;
   --text: #e6ecff;
   --muted: #9fb0d8;
   --success: #72f0a6;
@@ -117,7 +117,7 @@ input, button {
   padding: 10px;
   border-radius: 10px;
   border: 1px solid #42528f;
-  background: #101a3b;
+  background: #ff3399;
   color: var(--text);
 }
 
