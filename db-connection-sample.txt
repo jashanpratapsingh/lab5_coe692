@@ -1,0 +1,33 @@
+Lab 5 Database Connection Test Samples
+
+1) Run full connectivity check for all DB deployments:
+./db-connection-check.sh
+
+2) Run with explicit namespace:
+NAMESPACE=default ./db-connection-check.sh
+
+3) Open an interactive MySQL shell inside one DB deployment:
+./db-connection-check.sh --open auth-service-db
+./db-connection-check.sh --open reservation-service-db
+
+4) If you changed MySQL root password in Kubernetes:
+MYSQL_ROOT_PASSWORD=your_root_password ./db-connection-check.sh
+
+5) Preview sample values from each service database:
+./db-connection-check.sh --values
+./db-connection-check.sh --values --limit 5
+
+6) Preview values from a specific table:
+./db-connection-check.sh --table-values reservation-service-db reservation_item
+./db-connection-check.sh --table-values checkout-penalty-service-db rental_transaction --limit 10
+
+Expected success pattern:
+- PASS: MySQL connection and database access OK
+- A table list for each service database
+- "All database connectivity checks passed."
+
+If failures occur:
+- Verify cluster context: kubectl config current-context
+- Verify pods are running: kubectl get pods
+- Verify deployment exists: kubectl get deploy
+- Verify DB password matches Kubernetes configuration
